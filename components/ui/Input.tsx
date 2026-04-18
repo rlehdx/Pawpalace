@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
-  hint?:  string;
+  hint?: string;
   error?: string;
-  icon?:  React.ReactNode;
+  icon?: React.ReactNode;
   iconPosition?: "left" | "right";
   onIconClick?: () => void;
 }
@@ -46,8 +46,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative">
           {hasIcon && iconPosition === "left" && (
-            <button
-              type="button"
+            <span
               onClick={onIconClick}
               className={cn(
                 "absolute left-3 top-1/2 -translate-y-1/2 text-slate-400",
@@ -55,38 +54,33 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                   ? "cursor-pointer hover:text-amber-500 transition-colors"
                   : "pointer-events-none"
               )}
-              aria-hidden={!onIconClick}
-              tabIndex={onIconClick ? 0 : -1}
+              aria-hidden="true"
             >
               {icon}
-            </button>
+            </span>
           )}
 
           <input
             ref={ref}
             id={inputId}
             className={cn(
-              // Base
               "w-full font-body text-sm text-slate-900 placeholder:text-slate-400",
               "bg-white border rounded-xl",
               "transition-all duration-200",
               "focus:outline-none focus:ring-2 focus:ring-offset-0",
-              // Default state
               !error
                 ? "border-slate-200 hover:border-slate-300 focus:border-amber-400 focus:ring-amber-200"
                 : "border-red-300 hover:border-red-400 focus:border-red-400 focus:ring-red-200",
-              // Padding — account for icon
               hasIcon && iconPosition === "left"  ? "pl-10 pr-4 py-3" : "",
               hasIcon && iconPosition === "right" ? "pr-10 pl-4 py-3" : "",
-              !hasIcon                            ? "px-4  py-3"       : "",
+              !hasIcon                            ? "px-4 py-3"       : "",
               className
             )}
             {...props}
           />
 
           {hasIcon && iconPosition === "right" && (
-            <button
-              type="button"
+            <span
               onClick={onIconClick}
               className={cn(
                 "absolute right-3 top-1/2 -translate-y-1/2 text-slate-400",
@@ -94,11 +88,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                   ? "cursor-pointer hover:text-amber-500 transition-colors"
                   : "pointer-events-none"
               )}
-              aria-hidden={!onIconClick}
-              tabIndex={onIconClick ? 0 : -1}
+              aria-hidden="true"
             >
               {icon}
-            </button>
+            </span>
           )}
         </div>
 

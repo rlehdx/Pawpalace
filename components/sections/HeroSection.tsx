@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ArrowRight, Play, Star, ShieldCheck, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,11 +11,13 @@ const HERO_SLIDES = [
     id: 1,
     tag: "New Collection 2026",
     headline: "Your Pet Deserves\nThe Very Best",
-    subheadline: "Premium pet supplies chosen by vets, loved by pets — delivered to your door in 2 days.",
-    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200&q=85",
+    subheadline:
+      "Premium pet supplies chosen by vets, loved by pets — delivered to your door in 2 days.",
+    image:
+      "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200&q=85",
     imageAlt: "Happy golden retriever with premium pet products",
-    accent: "amber",
-    cta: { label: "Shop Dogs",  href: "/category/dog" },
+    accent: "amber" as const,
+    cta: { label: "Shop Dogs", href: "/category/dog" },
     secondaryCta: { label: "Watch Story", href: "#" },
     stats: [
       { value: "50K+", label: "Happy Pets" },
@@ -27,11 +29,13 @@ const HERO_SLIDES = [
     id: 2,
     tag: "Feline Collection",
     headline: "Spoil Your Cat\nBeyond Purr-fection",
-    subheadline: "Curated cat essentials — from gourmet treats to luxury beds. Because every cat is royalty.",
-    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=1200&q=85",
+    subheadline:
+      "Curated cat essentials — from gourmet treats to luxury beds. Because every cat is royalty.",
+    image:
+      "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=1200&q=85",
     imageAlt: "Elegant cat with premium cat products",
-    accent: "emerald",
-    cta: { label: "Shop Cats",  href: "/category/cat" },
+    accent: "emerald" as const,
+    cta: { label: "Shop Cats", href: "/category/cat" },
     secondaryCta: { label: "View Lookbook", href: "#" },
     stats: [
       { value: "186+", label: "Cat Products" },
@@ -45,30 +49,31 @@ export function HeroSection() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Auto-advance slides
-  useEffect(() => {
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 7000);
-    return () => clearInterval(interval);
+  const goToSlide = useCallback(
+    (index: number) => {
+      if (index === activeSlide) return;
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setActiveSlide(index);
+        setIsTransitioning(false);
+      }, 300);
+    },
+    [activeSlide]
+  );
+
+  const nextSlide = useCallback(() => {
+    const nextIndex = (activeSlide + 1) % HERO_SLIDES.length;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setActiveSlide(nextIndex);
+      setIsTransitioning(false);
+    }, 300);
   }, [activeSlide]);
 
-  function nextSlide() {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-      setIsTransitioning(false);
-    }, 300);
-  }
-
-  function goToSlide(index: number) {
-    if (index === activeSlide) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setActiveSlide(index);
-      setIsTransitioning(false);
-    }, 300);
-  }
+  useEffect(() => {
+    const interval = setInterval(nextSlide, 7000);
+    return () => clearInterval(interval);
+  }, [nextSlide]);
 
   const slide = HERO_SLIDES[activeSlide];
 
@@ -93,7 +98,6 @@ export function HeroSection() {
           className="object-cover object-center scale-105"
           sizes="100vw"
         />
-        {/* Gradient overlays */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/50 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
       </div>
@@ -115,7 +119,8 @@ export function HeroSection() {
           <div
             className={cn(
               "section-label animate-fade-down animate-fill-both",
-              slide.accent === "emerald" && "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+              slide.accent === "emerald" &&
+                "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
             )}
           >
             <span aria-hidden="true">✦</span>
@@ -136,12 +141,16 @@ export function HeroSection() {
                   <span
                     className={cn(
                       "italic",
-                      slide.accent === "amber" ? "text-amber-400" : "text-emerald-400"
+                      slide.accent === "amber"
+                        ? "text-amber-400"
+                        : "text-emerald-400"
                     )}
                   >
                     {line}
                   </span>
-                ) : line}
+                ) : (
+                  line
+                )}
               </span>
             ))}
           </h1>
@@ -169,14 +178,18 @@ export function HeroSection() {
               icon={<ArrowRight size={18} />}
               iconPosition="right"
               className="font-bold shadow-deep"
-              onClick={() => { window.location.href = slide.cta.href; }}
+              onClick={() => {
+                window.location.href = slide.cta.href;
+              }}
             >
               {slide.cta.label}
             </Button>
 
             <button
               className="flex items-center gap-2.5 text-white/90 hover:text-white transition-colors group"
-              onClick={() => { window.location.href = slide.secondaryCta.href; }}
+              onClick={() => {
+                window.location.href = slide.secondaryCta.href;
+              }}
             >
               <span
                 className={cn(
@@ -185,9 +198,16 @@ export function HeroSection() {
                   "backdrop-blur-sm"
                 )}
               >
-                <Play size={16} fill="currentColor" className="ml-0.5" aria-hidden="true" />
+                <Play
+                  size={16}
+                  fill="currentColor"
+                  className="ml-0.5"
+                  aria-hidden="true"
+                />
               </span>
-              <span className="text-sm font-semibold">{slide.secondaryCta.label}</span>
+              <span className="text-sm font-semibold">
+                {slide.secondaryCta.label}
+              </span>
             </button>
           </div>
 
@@ -204,15 +224,22 @@ export function HeroSection() {
                   <p
                     className={cn(
                       "text-2xl font-bold leading-none",
-                      slide.accent === "amber" ? "text-amber-400" : "text-emerald-400"
+                      slide.accent === "amber"
+                        ? "text-amber-400"
+                        : "text-emerald-400"
                     )}
                   >
                     {stat.value}
                   </p>
-                  <p className="text-xs text-slate-400 mt-1 font-medium">{stat.label}</p>
+                  <p className="text-xs text-slate-400 mt-1 font-medium">
+                    {stat.label}
+                  </p>
                 </div>
                 {i < slide.stats.length - 1 && (
-                  <div className="h-8 w-px bg-white/15" aria-hidden="true" />
+                  <div
+                    className="h-8 w-px bg-white/15"
+                    aria-hidden="true"
+                  />
                 )}
               </React.Fragment>
             ))}
@@ -248,17 +275,35 @@ export function HeroSection() {
         <div className="container-site py-3">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-6 text-xs text-slate-300">
             <div className="flex items-center gap-1.5">
-              <Truck size={14} className="text-amber-400" aria-hidden="true" />
+              <Truck
+                size={14}
+                className="text-amber-400"
+                aria-hidden="true"
+              />
               <span>Free delivery over $49</span>
             </div>
-            <div className="hidden sm:block h-3 w-px bg-white/20" aria-hidden="true" />
+            <div
+              className="hidden sm:block h-3 w-px bg-white/20"
+              aria-hidden="true"
+            />
             <div className="flex items-center gap-1.5">
-              <ShieldCheck size={14} className="text-emerald-400" aria-hidden="true" />
+              <ShieldCheck
+                size={14}
+                className="text-emerald-400"
+                aria-hidden="true"
+              />
               <span>30-day returns</span>
             </div>
-            <div className="hidden sm:block h-3 w-px bg-white/20" aria-hidden="true" />
+            <div
+              className="hidden sm:block h-3 w-px bg-white/20"
+              aria-hidden="true"
+            />
             <div className="flex items-center gap-1.5">
-              <Star size={14} className="text-amber-400 fill-amber-400" aria-hidden="true" />
+              <Star
+                size={14}
+                className="text-amber-400 fill-amber-400"
+                aria-hidden="true"
+              />
               <span>4.9/5 from 50,000+ reviews</span>
             </div>
           </div>

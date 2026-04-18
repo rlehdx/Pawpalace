@@ -12,10 +12,6 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    optimizePackageImports: ["lucide-react"],
-    forceSwcTransforms: false,
-  },
 };
 
 export default nextConfig;
