@@ -227,7 +227,7 @@ export function Header() {
               <div ref={accountRef} className="relative">
                 <IconButton
                   aria-label="Account"
-                  tooltip={user ? user.email ?? "Account" : "로그인"}
+                  tooltip={user ? user.email ?? "Account" : "Sign in"}
                   onClick={() => setAccountOpen((prev) => !prev)}
                 >
                   <User size={20} />
@@ -241,7 +241,7 @@ export function Header() {
                     {user ? (
                       <>
                         <div className="px-4 py-2 border-b border-slate-100 mb-1">
-                          <p className="text-xs text-slate-400">로그인됨</p>
+                          <p className="text-xs text-slate-400">Signed in as</p>
                           <p className="text-sm font-semibold text-slate-800 truncate">{user.email}</p>
                         </div>
                         <a
@@ -249,21 +249,21 @@ export function Header() {
                           className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
                           onClick={() => setAccountOpen(false)}
                         >
-                          <User size={15} /> 내 계정
+                          <User size={15} /> My Account
                         </a>
                         <a
                           href="/account/orders"
                           className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
                           onClick={() => setAccountOpen(false)}
                         >
-                          <Package size={15} /> 주문 내역
+                          <Package size={15} /> My Orders
                         </a>
                         <div className="border-t border-slate-100 mt-1 pt-1">
                           <button
                             onClick={handleLogout}
                             className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
                           >
-                            <LogOut size={15} /> 로그아웃
+                            <LogOut size={15} /> Sign out
                           </button>
                         </div>
                       </>
@@ -274,14 +274,14 @@ export function Header() {
                           className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-amber-600 hover:bg-amber-50 transition-colors"
                           onClick={() => setAccountOpen(false)}
                         >
-                          <LogIn size={15} /> 로그인
+                          <LogIn size={15} /> Sign in
                         </a>
                         <a
                           href="/signup"
                           className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
                           onClick={() => setAccountOpen(false)}
                         >
-                          <User size={15} /> 회원가입
+                          <User size={15} /> Create account
                         </a>
                       </>
                     )}
@@ -428,7 +428,7 @@ export function Header() {
               {user ? (
                 <>
                   <div className="px-4 py-2 mb-1">
-                    <p className="text-xs text-slate-400">로그인됨</p>
+                    <p className="text-xs text-slate-400">Signed in as</p>
                     <p className="text-sm font-semibold text-slate-800 truncate">{user.email}</p>
                   </div>
                   <a
@@ -436,20 +436,20 @@ export function Header() {
                     className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
-                    <User size={18} /> 내 계정
+                    <User size={18} /> My Account
                   </a>
                   <a
                     href="/account/orders"
                     className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
-                    <Package size={18} /> 주문 내역
+                    <Package size={18} /> My Orders
                   </a>
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors"
                   >
-                    <LogOut size={18} /> 로그아웃
+                    <LogOut size={18} /> Sign out
                   </button>
                 </>
               ) : (
@@ -459,14 +459,14 @@ export function Header() {
                     className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-amber-600 hover:bg-amber-50 rounded-xl transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
-                    <LogIn size={18} /> 로그인
+                    <LogIn size={18} /> Sign in
                   </a>
                   <a
                     href="/signup"
                     className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
-                    <User size={18} /> 회원가입
+                    <User size={18} /> Create account
                   </a>
                 </>
               )}

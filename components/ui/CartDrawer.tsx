@@ -22,7 +22,7 @@ export function CartDrawer() {
   const [checkingOut, setCheckingOut] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
 
-  // ESC 키로 닫기
+  // Close on ESC key
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setIsOpen(false);
@@ -31,7 +31,7 @@ export function CartDrawer() {
     return () => document.removeEventListener("keydown", onKey);
   }, [isOpen, setIsOpen]);
 
-  // 오픈 시 body 스크롤 막기
+  // Lock body scroll when open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => {
@@ -46,7 +46,7 @@ export function CartDrawer() {
       const url = await createCheckoutSession(items);
       window.location.href = url;
     } catch {
-      alert("결제 중 오류가 발생했습니다. 로그인 후 다시 시도해주세요.");
+      alert("Checkout failed. Please sign in and try again.");
     } finally {
       setCheckingOut(false);
     }
@@ -83,7 +83,7 @@ export function CartDrawer() {
           <div className="flex items-center gap-2">
             <ShoppingCart size={20} className="text-amber-500" />
             <h2 className="font-display text-xl font-bold text-slate-900">
-              장바구니
+              Your Cart
             </h2>
             {totalItems > 0 && (
               <span className="ml-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
@@ -104,11 +104,11 @@ export function CartDrawer() {
         {!qualifiesForFreeShipping && items.length > 0 && (
           <div className="px-6 py-3 bg-amber-50 border-b border-amber-100">
             <p className="text-xs text-amber-700 mb-1.5">
-              무료배송까지{" "}
+              Add{" "}
               <span className="font-bold">
                 ${amountToFreeShipping.toFixed(2)}
               </span>{" "}
-              남았습니다
+              more for free shipping!
             </p>
             <div className="w-full h-1.5 bg-amber-200 rounded-full overflow-hidden">
               <div
@@ -121,7 +121,7 @@ export function CartDrawer() {
         {qualifiesForFreeShipping && items.length > 0 && (
           <div className="px-6 py-3 bg-emerald-50 border-b border-emerald-100">
             <p className="text-xs text-emerald-700 font-semibold">
-              🎉 무료배송 조건 충족!
+              🎉 You qualify for free shipping!
             </p>
           </div>
         )}
@@ -134,14 +134,14 @@ export function CartDrawer() {
                 <ShoppingCart size={32} className="text-slate-300" />
               </div>
               <p className="text-slate-500 font-medium">
-                장바구니가 비어있습니다
+                Your cart is empty
               </p>
               <a
                 href="/products"
                 onClick={() => setIsOpen(false)}
                 className="text-sm text-amber-600 font-semibold hover:underline"
               >
-                쇼핑 계속하기 →
+                Continue shopping →
               </a>
             </div>
           ) : (
@@ -217,18 +217,18 @@ export function CartDrawer() {
         {items.length > 0 && (
           <div className="border-t border-slate-100 px-6 py-5 bg-white">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-slate-600 text-sm">소계</span>
+              <span className="text-slate-600 text-sm">Subtotal</span>
               <span className="font-bold text-slate-900">
                 ${subtotal.toFixed(2)}
               </span>
             </div>
             {qualifiesForFreeShipping ? (
               <p className="text-xs text-emerald-600 font-medium mb-4">
-                배송비: 무료
+                Shipping: Free 🎉
               </p>
             ) : (
               <p className="text-xs text-slate-400 mb-4">
-                배송비는 결제 시 계산됩니다
+                Shipping calculated at checkout
               </p>
             )}
             <button
@@ -244,10 +244,10 @@ export function CartDrawer() {
               )}
             >
               {checkingOut ? (
-                "결제 중..."
+                "Processing..."
               ) : (
                 <>
-                  결제하기 <ArrowRight size={16} />
+                  Checkout <ArrowRight size={16} />
                 </>
               )}
             </button>
@@ -255,7 +255,7 @@ export function CartDrawer() {
               onClick={clearCart}
               className="w-full mt-2 py-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
             >
-              장바구니 비우기
+              Clear cart
             </button>
           </div>
         )}

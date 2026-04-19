@@ -12,6 +12,7 @@ import { formatPrice, calcDiscount } from "@/lib/utils";
 import type { Product, PetCategory } from "@/lib/types";
 import { ProductCardSkeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
+import { useCart } from "@/lib/cart";
 
 const FILTER_TABS: { label: string; value: PetCategory | "all" }[] = [
   { label: "All",      value: "all" },
@@ -27,6 +28,7 @@ export function ProductShowcase() {
   const [addedToCart, setAddedToCart]     = useState<Set<string>>(new Set());
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const { toast } = useToast();
+  const { addItem, setIsOpen: setCartOpen } = useCart();
   const [isLoading, setIsLoading] = useState(false);
 
   const filteredProducts = activeFilter === "all"
@@ -45,12 +47,14 @@ export function ProductShowcase() {
     const product = FEATURED_PRODUCTS.find((p) => p.id === productId);
     if (!product) return;
 
+    addItem(product, 1);
     setAddedToCart((prev) => new Set(prev).add(productId));
     toast({
       type: "success",
-      title: "장바구니에 담았습니다",
+      title: "Added to cart",
       message: product.name,
     });
+    setCartOpen(true);
 
     setTimeout(() => {
       setAddedToCart((prev) => {
@@ -59,7 +63,7 @@ export function ProductShowcase() {
         return next;
       });
     }, 2000);
-  }, [toast]);
+  }, [toast, addItem, setCartOpen]);
 
   return (
     <section

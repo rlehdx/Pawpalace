@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_execute_file",
+      "mcp__plugin_context-mode_context-mode__ctx_search",
+      "Bash(npx tsc:*)",
+      "Bash(git -C \"C:/Users/rlehd/Downloads/Pawpalace-main/Pawpalace-main\" add components/ui/Toast.tsx)",
+      "Bash(git -C \"C:/Users/rlehd/Downloads/Pawpalace-main/Pawpalace-main\" commit -m \"fix: prevent toast timer reset on parent re-render\")",
+      "Bash(git -C \"C:/Users/rlehd/Downloads/Pawpalace-main/Pawpalace-main\" add app/products/)",
+      "Bash(git -C \"C:/Users/rlehd/Downloads/Pawpalace-main/Pawpalace-main\" commit -m \"feat: add product detail page with image gallery and trust signals\")",
+      "Bash(npm run:*)",
+      "Bash(git -C \"C:/Users/rlehd/Downloads/Pawpalace-main/Pawpalace-main\" add \"app/\\(auth\\)\")",
+      "Bash(git -C:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

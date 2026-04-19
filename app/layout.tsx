@@ -3,6 +3,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ToastProvider } from "@/components/ui/Toast";
+import { CartDrawer } from "@/components/ui/CartDrawer";
 
 /* ============================================
    SEO METADATA
@@ -145,6 +146,7 @@ export default function RootLayout({
           </main>
 
           <Footer />
+          <CartDrawer />
         </ToastProvider>
       </body>
     </html>

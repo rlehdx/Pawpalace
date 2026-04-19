@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { ShoppingCart, Star, Truck, RotateCcw, Shield, ChevronLeft } from "lucide-react";
+import { Star, Truck, RotateCcw, Shield, ChevronLeft } from "lucide-react";
 import { FEATURED_PRODUCTS } from "@/lib/data";
-import { Button } from "@/components/ui/Button";
 import { ProductBadge } from "@/components/ui/Badge";
+import { AddToCartButton } from "./AddToCartButton";
 
 interface Props {
   params: { id: string };
@@ -16,7 +16,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = FEATURED_PRODUCTS.find((p) => p.slug === params.id);
-  if (!product) return { title: "상품을 찾을 수 없습니다" };
+  if (!product) return { title: "Product not found" };
   return {
     title: product.name,
     description: product.description,
@@ -36,17 +36,17 @@ export default function ProductDetailPage({ params }: Props) {
       <div className="container-site">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8" aria-label="Breadcrumb">
-          <a href="/" className="hover:text-amber-600 transition-colors">홈</a>
+          <a href="/" className="hover:text-amber-600 transition-colors">Home</a>
           <span aria-hidden="true">/</span>
-          <a href={`/category/${product.category}`} className="hover:text-amber-600 transition-colors capitalize">{product.category}</a>
+          <a href={`/products?category=${product.category}`} className="hover:text-amber-600 transition-colors capitalize">{product.category}</a>
           <span aria-hidden="true">/</span>
           <span className="text-slate-900 font-medium truncate">{product.name}</span>
         </nav>
 
         {/* Back */}
-        <a href="/" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-amber-600 transition-colors mb-6 group">
+        <a href="/products" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-amber-600 transition-colors mb-6 group">
           <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
-          뒤로가기
+          Back to products
         </a>
 
         {/* Product Layout */}
@@ -77,7 +77,7 @@ export default function ProductDetailPage({ params }: Props) {
                   >
                     <Image
                       src={img}
-                      alt={`${product.name} 이미지 ${i + 2}`}
+                      alt={`${product.name} view ${i + 2}`}
                       fill
                       className="object-cover"
                       sizes="25vw"
@@ -97,7 +97,7 @@ export default function ProductDetailPage({ params }: Props) {
 
             {/* Rating */}
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1" aria-label={`별점 ${product.rating}점`}>
+              <div className="flex items-center gap-1" aria-label={`Rating: ${product.rating} out of 5`}>
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
@@ -110,7 +110,7 @@ export default function ProductDetailPage({ params }: Props) {
                 ))}
               </div>
               <span className="text-sm font-semibold text-slate-700">{product.rating}</span>
-              <span className="text-sm text-slate-400">({product.reviewCount.toLocaleString()} 리뷰)</span>
+              <span className="text-sm text-slate-400">({product.reviewCount.toLocaleString()} reviews)</span>
             </div>
 
             {/* Price */}
@@ -120,7 +120,7 @@ export default function ProductDetailPage({ params }: Props) {
                 <>
                   <span className="text-xl text-slate-400 line-through">${product.originalPrice}</span>
                   <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                    {discount}% 할인
+                    Save {discount}%
                   </span>
                 </>
               )}
@@ -130,7 +130,7 @@ export default function ProductDetailPage({ params }: Props) {
             <p className="text-slate-600 leading-relaxed">{product.description}</p>
 
             {/* Tags */}
-            <div className="flex flex-wrap gap-2" aria-label="상품 태그">
+            <div className="flex flex-wrap gap-2" aria-label="Product tags">
               {product.tags.map((tag) => (
                 <span
                   key={tag}
@@ -142,18 +142,16 @@ export default function ProductDetailPage({ params }: Props) {
             </div>
 
             {/* Add to Cart */}
-            <div className="flex gap-3 pt-2">
-              <Button size="lg" fullWidth icon={<ShoppingCart size={18} aria-hidden="true" />}>
-                장바구니에 담기
-              </Button>
+            <div className="pt-2">
+              <AddToCartButton product={product} />
             </div>
 
             {/* Trust signals */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100">
               {[
-                { icon: <Truck size={16} aria-hidden="true" />, label: product.freeShipping ? "무료 배송" : "$49 이상 무료배송" },
-                { icon: <RotateCcw size={16} aria-hidden="true" />, label: "30일 반품 보장" },
-                { icon: <Shield size={16} aria-hidden="true" />, label: "안전한 결제" },
+                { icon: <Truck size={16} aria-hidden="true" />, label: product.freeShipping ? "Free Shipping" : "Free shipping over $49" },
+                { icon: <RotateCcw size={16} aria-hidden="true" />, label: "30-day returns" },
+                { icon: <Shield size={16} aria-hidden="true" />, label: "Secure checkout" },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2 text-xs text-slate-600">
                   <span className="text-amber-500">{item.icon}</span>
