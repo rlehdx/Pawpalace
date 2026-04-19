@@ -42,11 +42,12 @@ const toastBg: Record<ToastType, string> = {
   warning: "border-amber-200 bg-amber-50",
 };
 
-function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
+function ToastItem({ toast, dismiss }: { toast: Toast; dismiss: (id: string) => void }) {
   useEffect(() => {
-    const timer = setTimeout(onDismiss, toast.duration ?? 4000);
+    const timer = setTimeout(() => dismiss(toast.id), toast.duration ?? 4000);
     return () => clearTimeout(timer);
-  }, [toast.duration, onDismiss]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toast.id, toast.duration]);
 
   return (
     <div
@@ -67,7 +68,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
         )}
       </div>
       <button
-        onClick={onDismiss}
+        onClick={() => dismiss(toast.id)}
         className="shrink-0 p-0.5 text-slate-400 hover:text-slate-700 transition-colors"
         aria-label="알림 닫기"
       >
@@ -98,7 +99,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       >
         {toasts.map((t) => (
           <div key={t.id} className="pointer-events-auto">
-            <ToastItem toast={t} onDismiss={() => dismiss(t.id)} />
+            <ToastItem toast={t} dismiss={dismiss} />
           </div>
         ))}
       </div>
