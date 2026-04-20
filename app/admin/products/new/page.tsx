@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { createProduct, uploadProductImage } from "../../actions";
 import { Button } from "@/components/ui/Button";
 import { Upload } from "lucide-react";
+import { useToast } from "@/components/ui/Toast";
 
 export default function AdminProductNewPage() {
   const router = useRouter();
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -23,7 +25,7 @@ export default function AdminProductNewPage() {
       const url = await uploadProductImage(fd);
       setImageUrl(url);
     } catch {
-      alert("Image upload failed");
+      toast({ type: "error", title: "Image upload failed", message: "Please try again." });
     } finally {
       setUploading(false);
     }
@@ -38,7 +40,7 @@ export default function AdminProductNewPage() {
       await createProduct(fd);
       router.push("/admin/products");
     } catch (err) {
-      alert("Failed to create product: " + (err as Error).message);
+      toast({ type: "error", title: "Failed to create product", message: (err as Error).message });
     } finally {
       setSubmitting(false);
     }

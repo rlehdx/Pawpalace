@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { updateProduct, uploadProductImage } from "../../../actions";
 import { Button } from "@/components/ui/Button";
 import { Upload } from "lucide-react";
+import { useToast } from "@/components/ui/Toast";
 
 interface Product {
   id: string;
@@ -24,6 +25,7 @@ export default function AdminProductEditForm({ product }: { product: Product }) 
   const [imageUrl, setImageUrl] = useState(product.images?.[0] ?? "");
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -35,7 +37,7 @@ export default function AdminProductEditForm({ product }: { product: Product }) 
       const url = await uploadProductImage(fd);
       setImageUrl(url);
     } catch {
-      alert("이미지 업로드 실패");
+      toast({ type: "error", title: "이미지 업로드 실패", message: "다시 시도해 주세요." });
     } finally {
       setUploading(false);
     }
@@ -50,7 +52,7 @@ export default function AdminProductEditForm({ product }: { product: Product }) 
       await updateProduct(product.id, fd);
       router.push("/admin/products");
     } catch (err) {
-      alert("수정 실패: " + (err as Error).message);
+      toast({ type: "error", title: "수정 실패", message: (err as Error).message });
     } finally {
       setSubmitting(false);
     }

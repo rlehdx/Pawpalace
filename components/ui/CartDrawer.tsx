@@ -5,6 +5,7 @@ import Link from "next/link";
 import { X, ShoppingCart, Minus, Plus, Trash2, ArrowRight } from "lucide-react";
 import { useCart, createCheckoutSession } from "@/lib/cart";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/Toast";
 
 export function CartDrawer() {
   const {
@@ -22,6 +23,7 @@ export function CartDrawer() {
 
   const [checkingOut, setCheckingOut] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   // Close on ESC key
   useEffect(() => {
@@ -47,7 +49,7 @@ export function CartDrawer() {
       const url = await createCheckoutSession(items);
       window.location.href = url;
     } catch {
-      alert("Checkout failed. Please sign in and try again.");
+      toast({ type: "error", title: "Checkout failed", message: "Please sign in and try again." });
     } finally {
       setCheckingOut(false);
     }

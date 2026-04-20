@@ -124,6 +124,17 @@ export async function toggleCoupon(id: string, isActive: boolean) {
 export async function uploadProductImage(formData: FormData): Promise<string> {
   const supabase = createClient();
   const file = formData.get("file") as File;
+
+  if (!file || !(file instanceof File)) throw new Error("파일이 없습니다.");
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("JPG, PNG, WEBP, GIF 파일만 업로드 가능합니다.");
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("파일 크기는 5MB 이하여야 합니다.");
+  }
+
   const ext = file.name.split(".").pop();
   const path = `products/${Date.now()}.${ext}`;
 

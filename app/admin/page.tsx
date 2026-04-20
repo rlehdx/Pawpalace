@@ -5,11 +5,12 @@ export default async function AdminDashboardPage() {
   const supabase = createClient();
 
   const [
-    { count: totalOrders },
-    { count: totalMembers },
-    { count: totalProducts },
-    { data: recentOrders },
-  ] = await Promise.all([
+    ordersCountResult,
+    membersCountResult,
+    productsCountResult,
+    recentOrdersResult,
+    revenueResult,
+  ] = await Promise.allSettled([
     supabase.from("pawpalace_orders").select("*", { count: "exact", head: true }),
     supabase.from("pawpalace_profiles").select("*", { count: "exact", head: true }),
     supabase.from("pawpalace_products").select("*", { count: "exact", head: true }),
@@ -18,12 +19,14 @@ export default async function AdminDashboardPage() {
       .select("id, status, total_amount, created_at")
       .order("created_at", { ascending: false })
       .limit(5),
+    supabase.from("pawpalace_orders").select("total_amount").eq("status", "paid"),
   ]);
 
-  const { data: revenueData } = await supabase
-    .from("pawpalace_orders")
-    .select("total_amount")
-    .eq("status", "paid");
+  const totalOrders = ordersCountResult.status === "fulfilled" ? ordersCountResult.value.count : null;
+  const totalMembers = membersCountResult.status === "fulfilled" ? membersCountResult.value.count : null;
+  const totalProducts = productsCountResult.status === "fulfilled" ? productsCountResult.value.count : null;
+  const recentOrders = recentOrdersResult.status === "fulfilled" ? recentOrdersResult.value.data : null;
+  const revenueData = revenueResult.status === "fulfilled" ? revenueResult.value.data : null;
   const totalRevenue = revenueData?.reduce((sum, o) => sum + Number(o.total_amount), 0) ?? 0;
 
   const stats = [
