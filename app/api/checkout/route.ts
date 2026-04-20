@@ -4,8 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  // @ts-expect-error: Stripe SDK types lag behind latest API version
-  apiVersion: "2026-03-25.dahlia",
+  apiVersion: "2026-03-25.dahlia" as any,
 });
 
 interface CheckoutItem {
