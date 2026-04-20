@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { Star, Truck, RotateCcw, Shield, ChevronLeft } from "lucide-react";
 import { FEATURED_PRODUCTS } from "@/lib/data";
+import type { Product } from "@/lib/types";
 import { ProductBadge } from "@/components/ui/Badge";
 import { AddToCartButton } from "./AddToCartButton";
 
@@ -23,6 +25,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+function buildProductJsonLd(product: Product) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images,
+    offers: {
+      "@type": "Offer",
+      price: product.price,
+      priceCurrency: "USD",
+      availability: product.inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: product.rating,
+      reviewCount: product.reviewCount,
+    },
+  };
+}
+
 export default function ProductDetailPage({ params }: Props) {
   const product = FEATURED_PRODUCTS.find((p) => p.slug === params.id);
   if (!product) notFound();
@@ -31,23 +56,30 @@ export default function ProductDetailPage({ params }: Props) {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
+  const jsonLd = buildProductJsonLd(product);
+
   return (
-    <main className="section-padding">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <main className="section-padding">
       <div className="container-site">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8" aria-label="Breadcrumb">
-          <a href="/" className="hover:text-amber-600 transition-colors">Home</a>
+          <Link href="/" className="hover:text-amber-600 transition-colors">Home</Link>
           <span aria-hidden="true">/</span>
-          <a href={`/products?category=${product.category}`} className="hover:text-amber-600 transition-colors capitalize">{product.category}</a>
+          <Link href={`/products?category=${product.category}`} className="hover:text-amber-600 transition-colors capitalize">{product.category}</Link>
           <span aria-hidden="true">/</span>
           <span className="text-slate-900 font-medium truncate">{product.name}</span>
         </nav>
 
         {/* Back */}
-        <a href="/products" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-amber-600 transition-colors mb-6 group">
+        <Link href="/products" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-amber-600 transition-colors mb-6 group">
           <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
           Back to products
-        </a>
+        </Link>
 
         {/* Product Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16">
@@ -163,5 +195,6 @@ export default function ProductDetailPage({ params }: Props) {
         </div>
       </div>
     </main>
+    </>
   );
 }

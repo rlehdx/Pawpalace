@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import Link from "next/link";
 import { X, ShoppingCart, Minus, Plus, Trash2, ArrowRight } from "lucide-react";
 import { useCart, createCheckoutSession } from "@/lib/cart";
 import { cn } from "@/lib/utils";
@@ -136,13 +137,13 @@ export function CartDrawer() {
               <p className="text-slate-500 font-medium">
                 Your cart is empty
               </p>
-              <a
+              <Link
                 href="/products"
                 onClick={() => setIsOpen(false)}
                 className="text-sm text-amber-600 font-semibold hover:underline"
               >
                 Continue shopping →
-              </a>
+              </Link>
             </div>
           ) : (
             <ul className="flex flex-col gap-4">

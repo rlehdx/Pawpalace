@@ -10,7 +10,6 @@ import { StarRating } from "@/components/ui/Card";
 import { FEATURED_PRODUCTS } from "@/lib/data";
 import { formatPrice, calcDiscount } from "@/lib/utils";
 import type { Product, PetCategory } from "@/lib/types";
-import { ProductCardSkeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/components/ui/Toast";
 import { useCart } from "@/lib/cart";
 
@@ -29,7 +28,6 @@ export function ProductShowcase() {
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const { toast } = useToast();
   const { addItem, setIsOpen: setCartOpen } = useCart();
-  const [isLoading, setIsLoading] = useState(false);
 
   const filteredProducts = activeFilter === "all"
     ? FEATURED_PRODUCTS
@@ -126,9 +124,7 @@ export function ProductShowcase() {
           role="list"
           aria-label="Products"
         >
-          {isLoading
-            ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
-            : filteredProducts.map((product, index) => (
+          {filteredProducts.map((product, index) => (
                 <ProductCard
                   key={product.id}
                   product={product}

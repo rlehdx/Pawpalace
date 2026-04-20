@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
@@ -21,20 +22,21 @@ export default function LoginPage() {
     setLoading(false);
 
     if (error) {
-      toast({ type: "error", title: "로그인 실패", message: "이메일 또는 비밀번호를 확인해주세요." });
+      toast({ type: "error", title: "Login failed", message: "Please check your email or password." });
       return;
     }
-    toast({ type: "success", title: "로그인 성공" });
-    router.push("/");
+    toast({ type: "success", title: "Logged in successfully" });
+    const redirectTo = searchParams.get("redirect") ?? "/";
+    router.push(redirectTo);
     router.refresh();
   }
 
   return (
     <div className="bg-white rounded-3xl shadow-card p-8">
-      <h1 className="font-display text-2xl font-bold text-slate-900 mb-6">로그인</h1>
+      <h1 className="font-display text-2xl font-bold text-slate-900 mb-6">Sign In</h1>
       <form onSubmit={handleLogin} className="flex flex-col gap-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">이메일</label>
+          <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
           <input
             id="email"
             type="email"
@@ -46,7 +48,7 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">비밀번호</label>
+          <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
           <input
             id="password"
             type="password"
@@ -58,13 +60,21 @@ export default function LoginPage() {
           />
         </div>
         <Button type="submit" loading={loading} fullWidth size="lg" className="mt-2">
-          로그인
+          Sign In
         </Button>
       </form>
       <p className="text-center text-sm text-slate-500 mt-6">
-        계정이 없으신가요?{" "}
-        <a href="/signup" className="text-amber-600 font-semibold hover:underline">회원가입</a>
+        Don&apos;t have an account?{" "}
+        <a href="/signup" className="text-amber-600 font-semibold hover:underline">Create account</a>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="bg-white rounded-3xl shadow-card p-8 h-64 animate-pulse" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

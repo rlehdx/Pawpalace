@@ -44,9 +44,9 @@ export default function NotFound() {
           </p>
           <div className="flex flex-wrap gap-2 justify-center">
             {[
-              { href: "/products?category=dog", label: "🐕 강아지" },
-              { href: "/products?category=cat", label: "🐈 고양이" },
-              { href: "/products?category=bird", label: "🦜 조류" },
+              { href: "/products?category=dog", label: "🐕 Dogs" },
+              { href: "/products?category=cat", label: "🐈 Cats" },
+              { href: "/products?category=bird", label: "🦜 Birds" },
               { href: "/login", label: "🔑 Sign in" },
             ].map(({ href, label }) => (
               <Link

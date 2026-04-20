@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ToastProvider } from "@/components/ui/Toast";
 import { CartDrawer } from "@/components/ui/CartDrawer";
+import { CartProvider } from "@/components/providers/CartProvider";
 
 /* ============================================
    SEO METADATA
@@ -131,22 +132,24 @@ export default function RootLayout({
       </head>
       <body className="font-body bg-brand-cream text-slate-900 antialiased">
         <ToastProvider>
-          {/* Skip to main content (accessibility) */}
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-amber-500 focus:text-white focus:rounded-lg focus:font-semibold"
-          >
-            Skip to main content
-          </a>
+          <CartProvider>
+            {/* Skip to main content (accessibility) */}
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-amber-500 focus:text-white focus:rounded-lg focus:font-semibold"
+            >
+              Skip to main content
+            </a>
 
-          <Header />
+            <Header />
 
-          <main id="main-content" tabIndex={-1}>
-            {children}
-          </main>
+            <main id="main-content" tabIndex={-1}>
+              {children}
+            </main>
 
-          <Footer />
-          <CartDrawer />
+            <Footer />
+            <CartDrawer />
+          </CartProvider>
         </ToastProvider>
       </body>
     </html>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Instagram, Twitter, Facebook, Youtube, Mail, Phone, MapPin, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -80,14 +81,14 @@ export function Footer() {
 
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-6">
-            <a href="/" className="inline-flex items-center gap-2.5">
+            <Link href="/" className="inline-flex items-center gap-2.5">
               <span className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center text-xl">
                 🐾
               </span>
               <span className="font-display font-bold text-xl leading-none">
                 Paw<span className="text-amber-500">Palace</span>
               </span>
-            </a>
+            </Link>
 
             <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
               Premium pet supplies delivered to your door. Because your furry family deserves the very best.
@@ -151,12 +152,12 @@ export function Footer() {
               <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <a
+                    <Link
                       href={link.href}
                       className="text-sm text-slate-400 hover:text-amber-400 transition-colors duration-150"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -221,12 +222,12 @@ export function Footer() {
             <div className="flex items-center gap-4">
               {FOOTER_LINKS.Legal.map((link, i) => (
                 <React.Fragment key={link.label}>
-                  <a
+                  <Link
                     href={link.href}
                     className="hover:text-amber-400 transition-colors"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                   {i < FOOTER_LINKS.Legal.length - 1 && (
                     <span className="text-slate-700" aria-hidden="true">·</span>
                   )}

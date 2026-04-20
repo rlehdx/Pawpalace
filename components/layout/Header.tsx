@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { Search, ShoppingCart, User, Menu, X, ChevronDown, Heart, Package, LogOut, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/Input";
-import { CartDrawer } from "@/components/ui/CartDrawer";
 import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
 import { NAV_ITEMS } from "@/lib/data";
@@ -103,7 +103,7 @@ export function Header() {
           <div className="flex items-center justify-between h-[4.5rem] gap-4">
 
             {/* Logo */}
-            <a
+            <Link
               href="/"
               className="flex items-center gap-2.5 shrink-0 group"
               aria-label="Paw Palace — Home"
@@ -121,7 +121,7 @@ export function Header() {
               <span className="font-display font-bold text-xl text-slate-900 leading-none">
                 Paw<span className="text-amber-500">Palace</span>
               </span>
-            </a>
+            </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
@@ -132,7 +132,7 @@ export function Header() {
                   onMouseEnter={() => item.children && setActiveDropdown(item.label)}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <a
+                  <Link
                     href={item.href}
                     className={cn(
                       "flex items-center gap-1 px-3 py-2 rounded-lg",
@@ -155,7 +155,7 @@ export function Header() {
                         aria-hidden="true"
                       />
                     )}
-                  </a>
+                  </Link>
 
                   {/* Dropdown */}
                   {item.children && activeDropdown === item.label && (
@@ -169,14 +169,14 @@ export function Header() {
                       role="menu"
                     >
                       {item.children.map((child) => (
-                        <a
+                        <Link
                           key={child.label}
                           href={child.href}
                           role="menuitem"
                           className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
                         >
                           {child.label}
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -244,20 +244,20 @@ export function Header() {
                           <p className="text-xs text-slate-400">Signed in as</p>
                           <p className="text-sm font-semibold text-slate-800 truncate">{user.email}</p>
                         </div>
-                        <a
+                        <Link
                           href="/account"
                           className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
                           onClick={() => setAccountOpen(false)}
                         >
                           <User size={15} /> My Account
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                           href="/account/orders"
                           className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
                           onClick={() => setAccountOpen(false)}
                         >
                           <Package size={15} /> My Orders
-                        </a>
+                        </Link>
                         <div className="border-t border-slate-100 mt-1 pt-1">
                           <button
                             onClick={handleLogout}
@@ -269,20 +269,20 @@ export function Header() {
                       </>
                     ) : (
                       <>
-                        <a
+                        <Link
                           href="/login"
                           className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-amber-600 hover:bg-amber-50 transition-colors"
                           onClick={() => setAccountOpen(false)}
                         >
                           <LogIn size={15} /> Sign in
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                           href="/signup"
                           className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
                           onClick={() => setAccountOpen(false)}
                         >
                           <User size={15} /> Create account
-                        </a>
+                        </Link>
                       </>
                     )}
                   </div>
@@ -391,7 +391,7 @@ export function Header() {
             <div className="p-4 space-y-1">
               {NAV_ITEMS.map((item) => (
                 <div key={item.label}>
-                  <a
+                  <Link
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
@@ -404,18 +404,18 @@ export function Header() {
                   >
                     {item.label}
                     {item.children && <ChevronDown size={16} />}
-                  </a>
+                  </Link>
                   {item.children && (
                     <div className="ml-4 space-y-0.5">
                       {item.children.map((child) => (
-                        <a
+                        <Link
                           key={child.label}
                           href={child.href}
                           onClick={() => setMobileOpen(false)}
                           className="block px-4 py-2 text-sm text-slate-600 hover:text-amber-600 rounded-lg hover:bg-amber-50 transition-colors"
                         >
                           {child.label}
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -431,20 +431,20 @@ export function Header() {
                     <p className="text-xs text-slate-400">Signed in as</p>
                     <p className="text-sm font-semibold text-slate-800 truncate">{user.email}</p>
                   </div>
-                  <a
+                  <Link
                     href="/account"
                     className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
                     <User size={18} /> My Account
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/account/orders"
                     className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
                     <Package size={18} /> My Orders
-                  </a>
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors"
@@ -454,20 +454,20 @@ export function Header() {
                 </>
               ) : (
                 <>
-                  <a
+                  <Link
                     href="/login"
                     className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-amber-600 hover:bg-amber-50 rounded-xl transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
                     <LogIn size={18} /> Sign in
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/signup"
                     className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
                     <User size={18} /> Create account
-                  </a>
+                  </Link>
                 </>
               )}
             </div>
@@ -475,8 +475,7 @@ export function Header() {
         </>
       )}
 
-      {/* Cart Drawer */}
-      <CartDrawer />
+
     </>
   );
 }

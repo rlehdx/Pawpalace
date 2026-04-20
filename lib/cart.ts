@@ -1,11 +1,22 @@
-import { useState, useEffect, useCallback } from "react";
+"use client";
+
+import { useState, useEffect, useCallback, createContext, useContext } from "react";
 import type { CartItem, Product } from "./types";
 
 const CART_STORAGE_KEY = "paw-palace-cart";
+const CART_EXPIRY_KEY = "paw-palace-cart-expiry";
+/** 카트 만료 시간: 24시간 */
+const CART_TTL_MS = 24 * 60 * 60 * 1000;
 
 function loadCartFromStorage(): CartItem[] {
   if (typeof window === "undefined") return [];
   try {
+    const expiry = localStorage.getItem(CART_EXPIRY_KEY);
+    if (expiry && Date.now() > Number(expiry)) {
+      localStorage.removeItem(CART_STORAGE_KEY);
+      localStorage.removeItem(CART_EXPIRY_KEY);
+      return [];
+    }
     const stored = localStorage.getItem(CART_STORAGE_KEY);
     return stored ? (JSON.parse(stored) as CartItem[]) : [];
   } catch {
@@ -17,18 +28,37 @@ function saveCartToStorage(items: CartItem[]): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    localStorage.setItem(CART_EXPIRY_KEY, String(Date.now() + CART_TTL_MS));
   } catch {
     // silently fail
   }
 }
 
-export function useCart() {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+interface CartContextValue {
+  items: CartItem[];
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  addItem: (product: Product, quantity?: number) => void;
+  removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  totalItems: number;
+  subtotal: number;
+  qualifiesForFreeShipping: boolean;
+  amountToFreeShipping: number;
+}
 
-  useEffect(() => {
-    setItems(loadCartFromStorage());
-  }, []);
+export const CartContext = createContext<CartContextValue | null>(null);
+
+export function useCart(): CartContextValue {
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error("useCart must be used within CartProvider");
+  return ctx;
+}
+
+export function useCartState(): CartContextValue {
+  const [items, setItems] = useState<CartItem[]>(() => loadCartFromStorage());
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     saveCartToStorage(items);

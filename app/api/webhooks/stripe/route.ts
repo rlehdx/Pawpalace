@@ -3,7 +3,8 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-03-25.dahlia" as any,
+  // @ts-expect-error: Stripe SDK types lag behind latest API version
+  apiVersion: "2026-03-25.dahlia",
 });
 
 // Webhook 핸들러는 service role 사용 (RLS 우회)
