@@ -1,6 +1,25 @@
 import { createClient } from "@/lib/supabase/server";
 import { updateOrderStatus } from "../actions";
 
+function debugLog(runId: string, hypothesisId: string, location: string, message: string, data: Record<string, unknown>) {
+  fetch("http://127.0.0.1:7529/ingest/80f33f56-fa95-4064-84b2-9411d5e38be4", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "6cb624",
+    },
+    body: JSON.stringify({
+      sessionId: "6cb624",
+      runId,
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+}
+
 const ORDER_STATUSES = [
   { value: "pending",   label: "Pending",   color: "bg-slate-100 text-slate-600" },
   { value: "paid",      label: "Paid",      color: "bg-blue-100 text-blue-700" },
@@ -12,6 +31,11 @@ const ORDER_STATUSES = [
 
 export default async function AdminOrdersPage() {
   const supabase = createClient();
+  // #region agent log
+  debugLog("baseline", "H5", "app/admin/orders/page.tsx:render", "AdminOrdersPage rendered", {
+    path: "/admin/orders",
+  });
+  // #endregion
   const { data: orders } = await supabase
     .from("pawpalace_orders")
     .select("id, status, total_amount, created_at, user_id")

@@ -10,6 +10,25 @@ import { createClient } from "@/lib/supabase/client";
 import { NAV_ITEMS } from "@/lib/data";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
+function debugLog(runId: string, hypothesisId: string, location: string, message: string, data: Record<string, unknown>) {
+  fetch("http://127.0.0.1:7529/ingest/80f33f56-fa95-4064-84b2-9411d5e38be4", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "6cb624",
+    },
+    body: JSON.stringify({
+      sessionId: "6cb624",
+      runId,
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+}
+
 export function Header() {
   const [isScrolled,      setIsScrolled]      = useState(false);
   const [mobileOpen,      setMobileOpen]      = useState(false);
@@ -18,6 +37,7 @@ export function Header() {
   const [searchQuery,     setSearchQuery]     = useState("");
   const [accountOpen,     setAccountOpen]     = useState(false);
   const [user,            setUser]            = useState<SupabaseUser | null>(null);
+  const [isAdmin,         setIsAdmin]         = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const accountRef = useRef<HTMLDivElement>(null);
 
@@ -26,9 +46,50 @@ export function Header() {
   // Supabase auth state
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    async function loadUserAndRole(nextUser: SupabaseUser | null) {
+      setUser(nextUser);
+      if (!nextUser) {
+        setIsAdmin(false);
+        // #region agent log
+        debugLog("baseline", "H1", "components/layout/Header.tsx:loadUserAndRole", "No authenticated user", {
+          hasUser: false,
+        });
+        // #endregion
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from("pawpalace_profiles")
+        .select("is_admin")
+        .eq("id", nextUser.id)
+        .maybeSingle();
+
+      const adminFlag = Boolean(profile?.is_admin);
+      setIsAdmin(adminFlag);
+
+      // #region agent log
+      debugLog("baseline", "H2", "components/layout/Header.tsx:loadUserAndRole", "Loaded admin role for menu", {
+        userId: nextUser.id,
+        hasProfile: Boolean(profile),
+        isAdmin: adminFlag,
+        hadError: Boolean(error),
+        errorMessage: error?.message ?? null,
+      });
+      // #endregion
+    }
+
+    supabase.auth.getUser().then(({ data }) => {
+      void loadUserAndRole(data.user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // #region agent log
+      debugLog("baseline", "H3", "components/layout/Header.tsx:onAuthStateChange", "Auth state changed", {
+        event,
+        hasSessionUser: Boolean(session?.user),
+      });
+      // #endregion
+      void loadUserAndRole(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -258,6 +319,15 @@ export function Header() {
                         >
                           <Package size={15} /> My Orders
                         </Link>
+                        {isAdmin && (
+                          <Link
+                            href="/admin"
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                            onClick={() => setAccountOpen(false)}
+                          >
+                            <Package size={15} /> Admin Panel
+                          </Link>
+                        )}
                         <div className="border-t border-slate-100 mt-1 pt-1">
                           <button
                             onClick={handleLogout}
@@ -445,6 +515,15 @@ export function Header() {
                   >
                     <Package size={18} /> My Orders
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Package size={18} /> Admin Panel
+                    </Link>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors"

@@ -5,7 +5,7 @@
 
 create extension if not exists "uuid-ossp";
 
--- 1. ANIMAL CATEGORIES (대분류)
+-- 1. ANIMAL CATEGORIES (primary categories)
 create table if not exists pawpalace_animal_categories (
   id          uuid primary key default uuid_generate_v4(),
   slug        text unique not null,
@@ -16,7 +16,7 @@ create table if not exists pawpalace_animal_categories (
   created_at  timestamptz default now()
 );
 
--- 2. PRODUCT CATEGORIES (소분류)
+-- 2. PRODUCT CATEGORIES (subcategories)
 create table if not exists pawpalace_product_categories (
   id                  uuid primary key default uuid_generate_v4(),
   animal_category_id  uuid references pawpalace_animal_categories(id) on delete cascade,
@@ -47,7 +47,7 @@ create table if not exists pawpalace_products (
   updated_at            timestamptz default now()
 );
 
--- 4. PROFILES (auth.users 확장)
+-- 4. PROFILES (auth.users extension)
 create table if not exists pawpalace_profiles (
   id          uuid primary key references auth.users(id) on delete cascade,
   email       text not null,
@@ -83,7 +83,7 @@ create table if not exists pawpalace_order_items (
   created_at  timestamptz default now()
 );
 
--- TRIGGERS: updated_at 자동 갱신
+-- TRIGGERS: auto-update updated_at
 create or replace function update_updated_at()
 returns trigger as $$
 begin
@@ -100,7 +100,7 @@ create trigger trg_orders_updated_at
   before update on pawpalace_orders
   for each row execute function update_updated_at();
 
--- RPC: 재고 차감 (원자적)
+-- RPC: decrement stock (atomic)
 create or replace function decrement_stock(product_id uuid, qty int)
 returns void as $$
 begin
@@ -113,7 +113,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
--- TRIGGER: 신규 유저 → 프로필 자동 생성
+-- TRIGGER: auto-create profile for new users
 create or replace function handle_new_user()
 returns trigger as $$
 begin
@@ -124,6 +124,7 @@ begin
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function handle_new_user();
@@ -176,29 +177,29 @@ create policy "order_items_insert_own" on pawpalace_order_items for insert
     )
   );
 
--- SEED: 초기 카테고리
+-- SEED: initial categories
 insert into pawpalace_animal_categories (slug, name, emoji, sort_order) values
-  ('dog',       '강아지', '🐕', 1),
-  ('cat',       '고양이', '🐈', 2),
-  ('bird',      '조류',   '🦜', 3),
-  ('fish',      '어류',   '🐠', 4),
-  ('small-pet', '소동물', '🐹', 5)
+  ('dog',       'Dogs', '🐕', 1),
+  ('cat',       'Cats', '🐈', 2),
+  ('bird',      'Birds','🦜', 3),
+  ('fish',      'Fish', '🐠', 4),
+  ('small-pet', 'Small Pets', '🐹', 5)
 on conflict (slug) do nothing;
 
 insert into pawpalace_product_categories (animal_category_id, slug, name, sort_order)
-select id, 'dog-food',     '사료 & 간식', 1 from pawpalace_animal_categories where slug = 'dog' on conflict (slug) do nothing;
+select id, 'dog-food',     'Food & Treats', 1 from pawpalace_animal_categories where slug = 'dog' on conflict (slug) do nothing;
 insert into pawpalace_product_categories (animal_category_id, slug, name, sort_order)
-select id, 'dog-toys',     '장난감',      2 from pawpalace_animal_categories where slug = 'dog' on conflict (slug) do nothing;
+select id, 'dog-toys',     'Toys',      2 from pawpalace_animal_categories where slug = 'dog' on conflict (slug) do nothing;
 insert into pawpalace_product_categories (animal_category_id, slug, name, sort_order)
-select id, 'dog-beds',     '침대 & 가구', 3 from pawpalace_animal_categories where slug = 'dog' on conflict (slug) do nothing;
+select id, 'dog-beds',     'Beds & Furniture', 3 from pawpalace_animal_categories where slug = 'dog' on conflict (slug) do nothing;
 insert into pawpalace_product_categories (animal_category_id, slug, name, sort_order)
-select id, 'dog-grooming', '미용 & 위생', 4 from pawpalace_animal_categories where slug = 'dog' on conflict (slug) do nothing;
+select id, 'dog-grooming', 'Grooming & Hygiene', 4 from pawpalace_animal_categories where slug = 'dog' on conflict (slug) do nothing;
 
 insert into pawpalace_product_categories (animal_category_id, slug, name, sort_order)
-select id, 'cat-food',  '사료 & 간식',  1 from pawpalace_animal_categories where slug = 'cat' on conflict (slug) do nothing;
+select id, 'cat-food',  'Food & Treats',  1 from pawpalace_animal_categories where slug = 'cat' on conflict (slug) do nothing;
 insert into pawpalace_product_categories (animal_category_id, slug, name, sort_order)
-select id, 'cat-toys',  '장난감',        2 from pawpalace_animal_categories where slug = 'cat' on conflict (slug) do nothing;
+select id, 'cat-toys',  'Toys',        2 from pawpalace_animal_categories where slug = 'cat' on conflict (slug) do nothing;
 insert into pawpalace_product_categories (animal_category_id, slug, name, sort_order)
-select id, 'cat-beds',  '침대 & 캣타워', 3 from pawpalace_animal_categories where slug = 'cat' on conflict (slug) do nothing;
+select id, 'cat-beds',  'Beds & Cat Trees', 3 from pawpalace_animal_categories where slug = 'cat' on conflict (slug) do nothing;
 insert into pawpalace_product_categories (animal_category_id, slug, name, sort_order)
-select id, 'cat-litter','모래 & 화장실', 4 from pawpalace_animal_categories where slug = 'cat' on conflict (slug) do nothing;
+select id, 'cat-litter','Litter & Toilets', 4 from pawpalace_animal_categories where slug = 'cat' on conflict (slug) do nothing;

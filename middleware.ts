@@ -1,7 +1,31 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+function debugLog(runId: string, hypothesisId: string, location: string, message: string, data: Record<string, unknown>) {
+  fetch("http://127.0.0.1:7529/ingest/80f33f56-fa95-4064-84b2-9411d5e38be4", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "6cb624",
+    },
+    body: JSON.stringify({
+      sessionId: "6cb624",
+      runId,
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+}
+
 export async function middleware(request: NextRequest) {
+  // #region agent log
+  debugLog("baseline", "H6", "middleware.ts:middleware", "Middleware hit", {
+    pathname: request.nextUrl.pathname,
+  });
+  // #endregion
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

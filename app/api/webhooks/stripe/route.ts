@@ -12,6 +12,25 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function debugLog(runId: string, hypothesisId: string, location: string, message: string, data: Record<string, unknown>) {
+  fetch("http://127.0.0.1:7529/ingest/80f33f56-fa95-4064-84b2-9411d5e38be4", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "6cb624",
+    },
+    body: JSON.stringify({
+      sessionId: "6cb624",
+      runId,
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.text();
   const sig = request.headers.get("stripe-signature");
@@ -30,6 +49,13 @@ export async function POST(request: NextRequest) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
+    // #region agent log
+    debugLog("baseline", "H4", "app/api/webhooks/stripe/route.ts:POST", "checkout.session.completed received", {
+      eventId: event.id,
+      sessionId: session.id,
+      paymentIntentId: session.payment_intent ?? null,
+    });
+    // #endregion
     await handleCheckoutCompleted(session);
   }
 
@@ -67,6 +93,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     })
     .select()
     .single();
+
+  // #region agent log
+  debugLog("baseline", "H4", "app/api/webhooks/stripe/route.ts:handleCheckoutCompleted", "order insert result", {
+    stripeSessionId: session.id,
+    hadError: Boolean(orderError),
+    errorMessage: orderError?.message ?? null,
+    orderId: order?.id ?? null,
+  });
+  // #endregion
 
   if (orderError || !order) {
     console.error("Failed to create order:", orderError?.message);

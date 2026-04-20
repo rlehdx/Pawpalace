@@ -3,11 +3,36 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
+function debugLog(runId: string, hypothesisId: string, location: string, message: string, data: Record<string, unknown>) {
+  fetch("http://127.0.0.1:7529/ingest/80f33f56-fa95-4064-84b2-9411d5e38be4", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "6cb624",
+    },
+    body: JSON.stringify({
+      sessionId: "6cb624",
+      runId,
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+}
+
 // ——— 상품 ———
 
 export async function createProduct(formData: FormData) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  // #region agent log
+  debugLog("baseline", "H1", "app/admin/actions.ts:createProduct", "createProduct auth check", {
+    hasUser: Boolean(user),
+    userId: user?.id ?? null,
+  });
+  // #endregion
   if (!user) throw new Error("Unauthorized");
 
   const name = formData.get("name") as string;
@@ -76,7 +101,22 @@ export async function updateProduct(id: string, formData: FormData) {
 
 export async function deleteProduct(id: string) {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  // #region agent log
+  debugLog("baseline", "H1", "app/admin/actions.ts:deleteProduct", "deleteProduct invoked", {
+    hasUser: Boolean(user),
+    userId: user?.id ?? null,
+    productId: id,
+  });
+  // #endregion
   const { error } = await supabase.from("pawpalace_products").delete().eq("id", id);
+  // #region agent log
+  debugLog("baseline", "H3", "app/admin/actions.ts:deleteProduct", "deleteProduct DB result", {
+    productId: id,
+    hadError: Boolean(error),
+    errorMessage: error?.message ?? null,
+  });
+  // #endregion
   if (error) throw new Error(error.message);
   revalidatePath("/admin/products");
 }
@@ -85,6 +125,15 @@ export async function deleteProduct(id: string) {
 
 export async function updateOrderStatus(orderId: string, status: string) {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  // #region agent log
+  debugLog("baseline", "H2", "app/admin/actions.ts:updateOrderStatus", "updateOrderStatus invoked", {
+    hasUser: Boolean(user),
+    userId: user?.id ?? null,
+    orderId,
+    status,
+  });
+  // #endregion
   const { error } = await supabase
     .from("pawpalace_orders")
     .update({ status })
@@ -97,6 +146,14 @@ export async function updateOrderStatus(orderId: string, status: string) {
 
 export async function createCoupon(formData: FormData) {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  // #region agent log
+  debugLog("baseline", "H2", "app/admin/actions.ts:createCoupon", "createCoupon invoked", {
+    hasUser: Boolean(user),
+    userId: user?.id ?? null,
+    code: String(formData.get("code") ?? ""),
+  });
+  // #endregion
   const { error } = await supabase.from("pawpalace_coupons").insert({
     code: (formData.get("code") as string).toUpperCase(),
     discount_type: formData.get("discount_type") as string,
@@ -111,6 +168,15 @@ export async function createCoupon(formData: FormData) {
 
 export async function toggleCoupon(id: string, isActive: boolean) {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  // #region agent log
+  debugLog("baseline", "H2", "app/admin/actions.ts:toggleCoupon", "toggleCoupon invoked", {
+    hasUser: Boolean(user),
+    userId: user?.id ?? null,
+    couponId: id,
+    isActive,
+  });
+  // #endregion
   const { error } = await supabase
     .from("pawpalace_coupons")
     .update({ is_active: isActive })
