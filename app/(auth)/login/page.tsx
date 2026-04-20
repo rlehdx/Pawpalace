@@ -1,5 +1,11 @@
 "use client";
+// app/(auth)/login/page.js
+import React from "react";
+import LoginClient from "./LoginClient";
 
+export default function Page() {
+  return <LoginClient />;
+}
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
