@@ -12,6 +12,7 @@ import { formatPrice, calcDiscount } from "@/lib/utils";
 import type { Product, PetCategory } from "@/lib/types";
 import { useToast } from "@/components/ui/Toast";
 import { useCart } from "@/lib/cart";
+import { useWishlist } from "@/lib/wishlist";
 
 const FILTER_TABS: { label: string; value: PetCategory | "all" }[] = [
   { label: "All",      value: "all" },
@@ -23,7 +24,7 @@ const FILTER_TABS: { label: string; value: PetCategory | "all" }[] = [
 
 export function ProductShowcase() {
   const [activeFilter, setActiveFilter]   = useState<PetCategory | "all">("all");
-  const [wishlist, setWishlist]           = useState<Set<string>>(new Set());
+  const { ids: wishlistIds, toggle: toggleWishlist } = useWishlist();
   const [addedToCart, setAddedToCart]     = useState<Set<string>>(new Set());
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const { toast } = useToast();
@@ -32,14 +33,6 @@ export function ProductShowcase() {
   const filteredProducts = activeFilter === "all"
     ? FEATURED_PRODUCTS
     : FEATURED_PRODUCTS.filter((p) => p.category === activeFilter);
-
-  function toggleWishlist(id: string) {
-    setWishlist((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  }
 
   const addToCart = useCallback((productId: string) => {
     const product = FEATURED_PRODUCTS.find((p) => p.id === productId);
@@ -128,7 +121,7 @@ export function ProductShowcase() {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  isWishlisted={wishlist.has(product.id)}
+                  isWishlisted={wishlistIds.includes(product.id)}
                   isAddedToCart={addedToCart.has(product.id)}
                   isHovered={hoveredProduct === product.id}
                   onWishlistToggle={() => toggleWishlist(product.id)}

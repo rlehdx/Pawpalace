@@ -6,7 +6,10 @@ test.describe("Cart functionality", () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test
     await page.goto(BASE);
-    await page.evaluate(() => localStorage.removeItem("paw-palace-cart"));
+    await page.evaluate(() => {
+      localStorage.removeItem("paw-palace-cart");
+      localStorage.removeItem("paw-palace-wishlist");
+    });
   });
 
   // ─────────────────────────────────────────────

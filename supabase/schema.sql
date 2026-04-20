@@ -146,8 +146,22 @@ create policy "product_categories_write_admin" on pawpalace_product_categories f
   using (exists (select 1 from pawpalace_profiles where id = auth.uid() and is_admin = true));
 
 alter table pawpalace_profiles enable row level security;
+create or replace function is_admin_user()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.pawpalace_profiles p
+    where p.id = auth.uid()
+      and p.is_admin = true
+  );
+$$;
 create policy "profiles_read_own" on pawpalace_profiles for select
-  using (id = auth.uid() or exists (select 1 from pawpalace_profiles where id = auth.uid() and is_admin = true));
+  using (id = auth.uid() or is_admin_user());
 create policy "profiles_update_own" on pawpalace_profiles for update
   using (id = auth.uid());
 

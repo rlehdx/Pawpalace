@@ -6,6 +6,7 @@ import { Search, ShoppingCart, User, Menu, X, ChevronDown, Heart, Package, LogOu
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/Input";
 import { useCart } from "@/lib/cart";
+import { useWishlist } from "@/lib/wishlist";
 import { createClient } from "@/lib/supabase/client";
 import { NAV_ITEMS } from "@/lib/data";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -42,6 +43,7 @@ export function Header() {
   const accountRef = useRef<HTMLDivElement>(null);
 
   const { totalItems, setIsOpen: setCartOpen } = useCart();
+  const { count: wishlistCount } = useWishlist();
 
   // Supabase auth state
   useEffect(() => {
@@ -280,9 +282,23 @@ export function Header() {
                 )}
               </div>
 
-              <IconButton aria-label="Wishlist" tooltip="Wishlist">
+              <Link
+                href="/account/wishlist"
+                className={cn(
+                  "relative p-2.5 rounded-xl text-slate-600",
+                  "hover:text-amber-600 hover:bg-amber-50",
+                  "transition-colors duration-150"
+                )}
+                title="Wishlist"
+                aria-label={wishlistCount > 0 ? `Wishlist, ${wishlistCount} items` : "Wishlist"}
+              >
                 <Heart size={20} />
-              </IconButton>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-4 px-1 flex items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white tabular-nums">
+                    {wishlistCount > 99 ? "99+" : wishlistCount}
+                  </span>
+                )}
+              </Link>
 
               {/* Account dropdown */}
               <div ref={accountRef} className="relative">

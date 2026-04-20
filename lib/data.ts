@@ -527,3 +527,7 @@ export const REVIEWS: Review[] = [
     verified: true,
   },
 ];
+
+export function getProductById(id: string): Product | undefined {
+  return FEATURED_PRODUCTS.find((p) => p.id === id);
+}

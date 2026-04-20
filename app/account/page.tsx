@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, Package } from "lucide-react";
-import { AccountSections } from "@/components/account/AccountSections";
+import { AccountNav } from "@/components/account/AccountNav";
 
 export const metadata: Metadata = {
   title: "My Account — PawPalace",
@@ -29,7 +29,7 @@ export default function AccountPage() {
           <ChevronRight size={18} className="text-slate-400 group-hover:text-amber-600 transition-colors" />
         </Link>
 
-        <AccountSections />
+        <AccountNav />
 
         <div className="mt-8 text-center">
           <Link href="/" className="text-sm text-slate-500 hover:text-amber-600 transition-colors">
