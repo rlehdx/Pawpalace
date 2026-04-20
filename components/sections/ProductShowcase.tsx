@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Image from "next/image";
 import { ShoppingCart, Heart, Eye, ArrowRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,9 @@ import { StarRating } from "@/components/ui/Card";
 import { FEATURED_PRODUCTS } from "@/lib/data";
 import { formatPrice, calcDiscount } from "@/lib/utils";
 import type { Product, PetCategory } from "@/lib/types";
+import { ProductCardSkeleton } from "@/components/ui/Skeleton";
+import { useToast } from "@/components/ui/Toast";
+import { useCart } from "@/lib/cart";
 
 const FILTER_TABS: { label: string; value: PetCategory | "all" }[] = [
   { label: "All",      value: "all" },
@@ -24,6 +27,9 @@ export function ProductShowcase() {
   const [wishlist, setWishlist]           = useState<Set<string>>(new Set());
   const [addedToCart, setAddedToCart]     = useState<Set<string>>(new Set());
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
+  const { toast } = useToast();
+  const { addItem, setIsOpen: setCartOpen } = useCart();
+  const [isLoading, setIsLoading] = useState(false);
 
   const filteredProducts = activeFilter === "all"
     ? FEATURED_PRODUCTS
@@ -37,16 +43,27 @@ export function ProductShowcase() {
     });
   }
 
-  function addToCart(id: string) {
-    setAddedToCart((prev) => new Set(prev).add(id));
+  const addToCart = useCallback((productId: string) => {
+    const product = FEATURED_PRODUCTS.find((p) => p.id === productId);
+    if (!product) return;
+
+    addItem(product, 1);
+    setAddedToCart((prev) => new Set(prev).add(productId));
+    toast({
+      type: "success",
+      title: "Added to cart",
+      message: product.name,
+    });
+    setCartOpen(true);
+
     setTimeout(() => {
       setAddedToCart((prev) => {
         const next = new Set(prev);
-        next.delete(id);
+        next.delete(productId);
         return next;
       });
     }, 2000);
-  }
+  }, [toast, addItem, setCartOpen]);
 
   return (
     <section
@@ -105,23 +122,25 @@ export function ProductShowcase() {
 
         {/* Product Grid */}
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-8"
           role="list"
           aria-label="Products"
         >
-          {filteredProducts.map((product, index) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              isWishlisted={wishlist.has(product.id)}
-              isAddedToCart={addedToCart.has(product.id)}
-              isHovered={hoveredProduct === product.id}
-              onWishlistToggle={() => toggleWishlist(product.id)}
-              onAddToCart={() => addToCart(product.id)}
-              onHover={(id) => setHoveredProduct(id)}
-              style={{ animationDelay: `${index * 60}ms` }}
-            />
-          ))}
+          {isLoading
+            ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            : filteredProducts.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  isWishlisted={wishlist.has(product.id)}
+                  isAddedToCart={addedToCart.has(product.id)}
+                  isHovered={hoveredProduct === product.id}
+                  onWishlistToggle={() => toggleWishlist(product.id)}
+                  onAddToCart={() => addToCart(product.id)}
+                  onHover={(id) => setHoveredProduct(id)}
+                  style={{ animationDelay: `${index * 60}ms` }}
+                />
+              ))}
         </div>
 
         {filteredProducts.length === 0 && (

@@ -1,24 +1,39 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Search, ShoppingCart, User, Menu, X, ChevronDown, Heart, Package } from "lucide-react";
+import Link from "next/link";
+import { Search, ShoppingCart, User, Menu, X, ChevronDown, Heart, Package, LogOut, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/Input";
+import { useCart } from "@/lib/cart";
+import { createClient } from "@/lib/supabase/client";
 import { NAV_ITEMS } from "@/lib/data";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
-interface HeaderProps {
-  cartCount?: number;
-}
-
-export function Header({ cartCount = 0 }: HeaderProps) {
+export function Header() {
   const [isScrolled,      setIsScrolled]      = useState(false);
   const [mobileOpen,      setMobileOpen]      = useState(false);
   const [searchOpen,      setSearchOpen]      = useState(false);
   const [activeDropdown,  setActiveDropdown]  = useState<string | null>(null);
   const [searchQuery,     setSearchQuery]     = useState("");
+  const [accountOpen,     setAccountOpen]     = useState(false);
+  const [user,            setUser]            = useState<SupabaseUser | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
 
-  // Detect scroll for sticky header shadow
+  const { totalItems, setIsOpen: setCartOpen } = useCart();
+
+  // Supabase auth state
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Detect scroll
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 8);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -48,6 +63,24 @@ export function Header({ cartCount = 0 }: HeaderProps) {
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
+  // Close account dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+        setAccountOpen(false);
+      }
+    }
+    if (accountOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [accountOpen]);
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setAccountOpen(false);
+    window.location.href = "/";
+  }
+
   return (
     <>
       {/* Announcement Bar */}
@@ -70,7 +103,7 @@ export function Header({ cartCount = 0 }: HeaderProps) {
           <div className="flex items-center justify-between h-[4.5rem] gap-4">
 
             {/* Logo */}
-            <a
+            <Link
               href="/"
               className="flex items-center gap-2.5 shrink-0 group"
               aria-label="Paw Palace — Home"
@@ -88,7 +121,7 @@ export function Header({ cartCount = 0 }: HeaderProps) {
               <span className="font-display font-bold text-xl text-slate-900 leading-none">
                 Paw<span className="text-amber-500">Palace</span>
               </span>
-            </a>
+            </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
@@ -99,7 +132,7 @@ export function Header({ cartCount = 0 }: HeaderProps) {
                   onMouseEnter={() => item.children && setActiveDropdown(item.label)}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <a
+                  <Link
                     href={item.href}
                     className={cn(
                       "flex items-center gap-1 px-3 py-2 rounded-lg",
@@ -122,7 +155,7 @@ export function Header({ cartCount = 0 }: HeaderProps) {
                         aria-hidden="true"
                       />
                     )}
-                  </a>
+                  </Link>
 
                   {/* Dropdown */}
                   {item.children && activeDropdown === item.label && (
@@ -136,14 +169,14 @@ export function Header({ cartCount = 0 }: HeaderProps) {
                       role="menu"
                     >
                       {item.children.map((child) => (
-                        <a
+                        <Link
                           key={child.label}
                           href={child.href}
                           role="menuitem"
                           className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
                         >
                           {child.label}
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -190,23 +223,86 @@ export function Header({ cartCount = 0 }: HeaderProps) {
                 <Heart size={20} />
               </IconButton>
 
-              <IconButton aria-label="Account" tooltip="Account">
-                <User size={20} />
-              </IconButton>
+              {/* Account dropdown */}
+              <div ref={accountRef} className="relative">
+                <IconButton
+                  aria-label="Account"
+                  tooltip={user ? user.email ?? "Account" : "Sign in"}
+                  onClick={() => setAccountOpen((prev) => !prev)}
+                >
+                  <User size={20} />
+                  {user && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full" />
+                  )}
+                </IconButton>
+
+                {accountOpen && (
+                  <div className="absolute top-full right-0 mt-2 w-52 bg-white rounded-2xl shadow-lifted border border-slate-100 py-2 z-50">
+                    {user ? (
+                      <>
+                        <div className="px-4 py-2 border-b border-slate-100 mb-1">
+                          <p className="text-xs text-slate-400">Signed in as</p>
+                          <p className="text-sm font-semibold text-slate-800 truncate">{user.email}</p>
+                        </div>
+                        <Link
+                          href="/account"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                          onClick={() => setAccountOpen(false)}
+                        >
+                          <User size={15} /> My Account
+                        </Link>
+                        <Link
+                          href="/account/orders"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                          onClick={() => setAccountOpen(false)}
+                        >
+                          <Package size={15} /> My Orders
+                        </Link>
+                        <div className="border-t border-slate-100 mt-1 pt-1">
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                          >
+                            <LogOut size={15} /> Sign out
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/login"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-amber-600 hover:bg-amber-50 transition-colors"
+                          onClick={() => setAccountOpen(false)}
+                        >
+                          <LogIn size={15} /> Sign in
+                        </Link>
+                        <Link
+                          href="/signup"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                          onClick={() => setAccountOpen(false)}
+                        >
+                          <User size={15} /> Create account
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {/* Cart */}
               <button
+                onClick={() => setCartOpen(true)}
                 className={cn(
                   "relative flex items-center gap-2 px-4 py-2.5 rounded-xl",
                   "bg-amber-500 text-white text-sm font-semibold",
                   "hover:bg-amber-600 transition-all duration-200",
                   "shadow-warm hover:shadow-glow"
                 )}
-                aria-label={`Shopping cart, ${cartCount} items`}
+                aria-label={`Shopping cart, ${totalItems} items`}
               >
                 <ShoppingCart size={18} />
                 <span className="hidden xl:inline">Cart</span>
-                {cartCount > 0 && (
+                {totalItems > 0 && (
                   <span
                     className={cn(
                       "absolute -top-1.5 -right-1.5",
@@ -216,7 +312,7 @@ export function Header({ cartCount = 0 }: HeaderProps) {
                     )}
                     aria-hidden="true"
                   >
-                    {cartCount > 99 ? "99+" : cartCount}
+                    {totalItems > 99 ? "99+" : totalItems}
                   </span>
                 )}
               </button>
@@ -225,13 +321,14 @@ export function Header({ cartCount = 0 }: HeaderProps) {
             {/* Mobile Actions */}
             <div className="flex lg:hidden items-center gap-2">
               <button
+                onClick={() => setCartOpen(true)}
                 className="relative p-2.5 text-slate-700"
-                aria-label={`Shopping cart, ${cartCount} items`}
+                aria-label={`Shopping cart, ${totalItems} items`}
               >
                 <ShoppingCart size={22} />
-                {cartCount > 0 && (
+                {totalItems > 0 && (
                   <span className="absolute top-1 right-1 w-4 h-4 bg-amber-500 text-white text-2xs font-bold rounded-full flex items-center justify-center">
-                    {cartCount}
+                    {totalItems}
                   </span>
                 )}
               </button>
@@ -294,7 +391,7 @@ export function Header({ cartCount = 0 }: HeaderProps) {
             <div className="p-4 space-y-1">
               {NAV_ITEMS.map((item) => (
                 <div key={item.label}>
-                  <a
+                  <Link
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
@@ -307,18 +404,18 @@ export function Header({ cartCount = 0 }: HeaderProps) {
                   >
                     {item.label}
                     {item.children && <ChevronDown size={16} />}
-                  </a>
+                  </Link>
                   {item.children && (
                     <div className="ml-4 space-y-0.5">
                       {item.children.map((child) => (
-                        <a
+                        <Link
                           key={child.label}
                           href={child.href}
                           onClick={() => setMobileOpen(false)}
                           className="block px-4 py-2 text-sm text-slate-600 hover:text-amber-600 rounded-lg hover:bg-amber-50 transition-colors"
                         >
                           {child.label}
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -328,28 +425,57 @@ export function Header({ cartCount = 0 }: HeaderProps) {
 
             {/* Mobile account links */}
             <div className="border-t border-amber-100 p-4 space-y-1">
-              <a
-                href="/account"
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
-              >
-                <User size={18} /> My Account
-              </a>
-              <a
-                href="/wishlist"
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
-              >
-                <Heart size={18} /> Wishlist
-              </a>
-              <a
-                href="/orders"
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
-              >
-                <Package size={18} /> My Orders
-              </a>
+              {user ? (
+                <>
+                  <div className="px-4 py-2 mb-1">
+                    <p className="text-xs text-slate-400">Signed in as</p>
+                    <p className="text-sm font-semibold text-slate-800 truncate">{user.email}</p>
+                  </div>
+                  <Link
+                    href="/account"
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <User size={18} /> My Account
+                  </Link>
+                  <Link
+                    href="/account/orders"
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <Package size={18} /> My Orders
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                  >
+                    <LogOut size={18} /> Sign out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-amber-600 hover:bg-amber-50 rounded-xl transition-colors"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <LogIn size={18} /> Sign in
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:text-amber-600 rounded-xl hover:bg-amber-50 transition-colors"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <User size={18} /> Create account
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </>
       )}
+
+
     </>
   );
 }

@@ -45,7 +45,7 @@ export function CategoryGrid() {
 
         {/* Grid Layout */}
         <div
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 xl:gap-6 2xl:gap-8"
           role="list"
           aria-label="Pet categories"
         >

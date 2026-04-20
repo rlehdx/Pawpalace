@@ -147,6 +147,20 @@ body {
   }
 }
 
+@media (min-width: 1440px) {
+  .container-site {
+    max-width: 88rem;
+    padding-inline: 3rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .container-site {
+    max-width: 96rem;
+    padding-inline: 4rem;
+  }
+}
+
 .section-padding {
   padding-top: var(--section-gap);
   padding-bottom: var(--section-gap);
