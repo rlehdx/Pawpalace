@@ -1,5 +1,4 @@
 "use client";
-// app/(auth)/login/page.js
 import React from "react";
 import LoginClient from "./LoginClient";
 
